@@ -1,0 +1,13 @@
+.git
+__pycache__
+**/__pycache__
+*.pyc
+.env
+.env.*
+!deploy/.env.example
+*.sqlite3*
+admin-token
+*.zip
+*.xlsx
+*.pending
+tests

@@ -1,0 +1,8 @@
+{
+  "domain": "kwazar-led.ru",
+  "server_name": "kwazar-led",
+  "public_ipv4": "129.101.117.225",
+  "provider": "Timeweb Cloud",
+  "deployment_status": "awaiting_dns_and_file_transfer",
+  "dns_observation": "Public A and NS queries returned NXDOMAIN; registration/delegation needs checking in the owner panel."
+}

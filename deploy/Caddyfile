@@ -1,0 +1,24 @@
+{
+	admin off
+	servers {
+		timeouts {
+			read_header 10s
+			read_body 15s
+			write 45s
+			idle 1m
+		}
+	}
+}
+{$KWAZAR_DOMAIN} {
+	encode zstd gzip
+	request_body {
+		max_size 32KB
+	}
+	header Strict-Transport-Security "max-age=31536000"
+	reverse_proxy app:8000 {
+		transport http {
+			dial_timeout 5s
+			response_header_timeout 30s
+		}
+	}
+}

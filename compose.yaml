@@ -1,0 +1,73 @@
+name: kwazar
+services:
+  app:
+    build: .
+    image: kwazar-site:local
+    restart: unless-stopped
+    init: true
+    env_file:
+      - path: .env.runtime
+        required: false
+    environment:
+      KWAZAR_DATA_DIR: /var/lib/kwazar
+      KWAZAR_PUBLIC_URL: https://${KWAZAR_DOMAIN:?Set KWAZAR_DOMAIN in .env}
+      KWAZAR_TRUST_PROXY: "1"
+      KWAZAR_PAYMENTS_ENABLED: ${KWAZAR_PAYMENTS_ENABLED:-0}
+    expose: ["8000"]
+    volumes:
+      - orders:/var/lib/kwazar
+    read_only: true
+    tmpfs: ["/tmp:size=32m,mode=1777"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 128
+    mem_limit: 512m
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+  proxy:
+    image: caddy:2-alpine@sha256:e70b164da81ef698b3ad19af799ea6086ce6d9e48ed4079eb9fe26f6fbf14ee5
+    restart: unless-stopped
+    environment:
+      KWAZAR_DOMAIN: ${KWAZAR_DOMAIN:?Set KWAZAR_DOMAIN in .env}
+      NO_PROXY: app,localhost,127.0.0.1
+      no_proxy: app,localhost,127.0.0.1
+    ports: ["80:80", "443:443", "443:443/udp"]
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      app: {condition: service_healthy}
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+  backup:
+    image: kwazar-site:local
+    restart: unless-stopped
+    init: true
+    command: ["python3", "backup_store.py", "--data-dir", "/var/lib/kwazar", "--output-dir", "/backups", "--interval", "3600", "--keep", "168"]
+    volumes:
+      - orders:/var/lib/kwazar
+      - backups:/backups
+    depends_on:
+      app: {condition: service_healthy}
+    read_only: true
+    tmpfs: ["/tmp:size=16m,mode=1777"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 128m
+    healthcheck:
+      test: ["CMD", "python3", "-c", "from pathlib import Path; import time; files=list(Path('/backups').glob('kwazar-*.sqlite3')); assert files and time.time()-max(p.stat().st_mtime for p in files)<7200"]
+      interval: 60s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+volumes:
+  orders:
+  backups:
+  caddy_data:
+  caddy_config:

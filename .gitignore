@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.env
+.env.*
+*.sqlite3*
+admin-token
+!deploy/.env.example
+*.tar.gz
