@@ -66,6 +66,21 @@ class StoreTest(unittest.TestCase):
         self.assertEqual(code, 201)
         return payload, order
 
+    def test_owner_prices_persist_validate_and_clear(self):
+        product = next(p for p in store.CATALOG.values() if p.get('kind') == 'product')
+        payload = {'product_id': product['id'], 'price_kopeks': 123450}
+        self.assertEqual(self.req('/api/admin/prices', payload)[0], 401)
+        self.assertEqual(self.req('/api/admin/prices', payload, 'wrong-owner-token')[0], 401)
+        for value in [0, -1, True, 1.5, '100', 1000000001]:
+            self.assertEqual(self.req('/api/admin/prices', dict(payload, price_kopeks=value), store.ADMIN_TOKEN)[0], 400)
+        self.assertEqual(self.req('/api/admin/prices', dict(payload, product_id='unknown'), store.ADMIN_TOKEN)[0], 400)
+        self.assertEqual(self.req('/api/admin/prices', payload, store.ADMIN_TOKEN)[0], 200)
+        store.initialize()
+        products = self.req('/api/catalog')[1]
+        self.assertEqual(next(p for p in products if p['id'] == product['id'])['price_kopeks'], 123450)
+        self.assertEqual(self.req('/api/admin/prices', dict(payload, price_kopeks=None), store.ADMIN_TOKEN)[0], 200)
+        self.assertIsNone(next(p for p in self.req('/api/catalog')[1] if p['id'] == product['id'])['price_kopeks'])
+
     def test_health_reports_storage_readiness_without_private_details(self):
         code, result = self.req('/healthz')
         self.assertEqual(code, 200)

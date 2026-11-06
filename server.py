@@ -67,6 +67,7 @@ def initialize():
         ADMIN_TOKEN = key_file.read_text().strip()
     with connection() as db:
         db.execute('PRAGMA journal_mode=WAL')
+        db.execute('CREATE TABLE IF NOT EXISTS product_prices (product_id TEXT PRIMARY KEY, price_kopeks INTEGER CHECK(price_kopeks IS NULL OR price_kopeks BETWEEN 1 AND 1000000000))')
         db.execute('''CREATE TABLE IF NOT EXISTS orders (
             id TEXT PRIMARY KEY, request_id TEXT UNIQUE NOT NULL, fingerprint TEXT NOT NULL,
             access_token TEXT NOT NULL, reference TEXT NOT NULL, created_at TEXT NOT NULL,
@@ -255,6 +256,11 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.respond(200, {'status': 'ok'})
             except (sqlite3.Error, OSError, ValueError):
                 return self.respond(503, {'status': 'unavailable'})
+        if path == '/api/catalog':
+            with connection() as db:
+                prices = dict(db.execute('SELECT product_id, price_kopeks FROM product_prices').fetchall())
+            products = json.loads((ROOT / 'catalog.json').read_text())
+            return self.respond(200, [dict(p, price_kopeks=prices.get(p['id'])) for p in products])
         if path == '/api/orders':
             if self.limited('admin', 60):
                 return
@@ -304,6 +310,17 @@ class Handler(SimpleHTTPRequestHandler):
             if not isinstance(data, dict):
                 raise ValueError('Некорректный формат')
             path = urlsplit(self.path).path
+            if path == '/api/admin/prices':
+                if not self.is_admin():
+                    return self.respond(401, {'error': 'Нужен ключ владельца'})
+                identifier, price = data.get('product_id'), data.get('price_kopeks')
+                if not isinstance(identifier, str) or identifier not in CATALOG or CATALOG[identifier].get('kind') != 'product':
+                    raise ValueError('Неизвестный товар')
+                if price is not None and (type(price) is not int or not 1 <= price <= 1000000000):
+                    raise ValueError('Укажи цену от 0,01 до 10 000 000 ₽ или оставь поле пустым')
+                with connection() as db:
+                    db.execute('INSERT INTO product_prices(product_id, price_kopeks) VALUES (?, ?) ON CONFLICT(product_id) DO UPDATE SET price_kopeks=excluded.price_kopeks', (identifier, price))
+                return self.respond(200, {'product_id': identifier, 'price_kopeks': price})
             if path == '/api/payments/webhook':
                 return self.payment_webhook(data)
             if path == '/api/orders':
