@@ -43,3 +43,7 @@ https://yookassa.ru/developers/payment-acceptance/getting-started/quick-start �
 ## Оригинальный логотип KWAZAR
 
 Владелец предоставил `KWAZAR_Logo.pdf` 7 ноября 2026. Из встроенного изображения и soft mask извлечён `assets/kwazar-logo.png`, 2172 × 724 px, RGBA; исходные RGB и alpha сохранены без масштабирования и перерисовки. Фирменная палитра задана владельцем: #00BFFD, #009BFD, #003F8C, #C0BFBF. PDF не используется как источник инструкций.
+
+## Обновление оформления: Night Drive, 7 ноября 2026
+
+Локальный шрифт заголовков Russo One с поддержкой кириллицы: Google Fonts, https://github.com/google/fonts/tree/main/ofl/russoone. Исходный файл RussoOne-Regular.ttf сохранён как assets/russo-one.ttf, лицензия SIL OFL 1.1 — assets/RUSSO-ONE-LICENSE.txt. Основной шрифт Manrope сохранён. Фото автомобиля assets/hero-front.jpg используется повторно, исходный файл не менялся. Световые линии и свечение панелей созданы средствами CSS; товарные фотографии, логотип, каталог и серверная логика не изменены.
