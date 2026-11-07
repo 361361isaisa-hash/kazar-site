@@ -2,7 +2,7 @@ FROM python:3.12-slim-bookworm@sha256:e697c81897302a4c4333bade000d98038fbb21eb06
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 KWAZAR_DATA_DIR=/var/lib/kwazar
 WORKDIR /app
 RUN groupadd --gid 10001 kwazar && useradd --uid 10001 --gid 10001 --no-create-home kwazar && mkdir -p /var/lib/kwazar /backups && chown 10001:10001 /var/lib/kwazar /backups
-COPY --chown=10001:10001 server.py backup_store.py index.html admin.html order.html app.js account.js styles.css catalog.json selection.json ./
+COPY --chown=10001:10001 server.py backup_store.py index.html admin.html order.html requisites.html app.js account.js styles.css catalog.json selection.json ./
 COPY --chown=10001:10001 assets/ ./assets/
 USER 10001:10001
 EXPOSE 8000

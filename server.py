@@ -219,7 +219,7 @@ class Handler(SimpleHTTPRequestHandler):
 
     def safe_static(self):
         path = unquote(urlsplit(self.path).path)
-        allowed = {'/', '/index.html', '/styles.css', '/app.js', '/account.js', '/catalog.json', '/order.html', '/admin.html'}
+        allowed = {'/', '/index.html', '/styles.css', '/app.js', '/account.js', '/catalog.json', '/order.html', '/admin.html', '/requisites.html'}
         if path not in allowed:
             target = (ROOT / path.lstrip('/')).resolve()
             asset_root = (ROOT / 'assets').resolve()

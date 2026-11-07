@@ -79,3 +79,8 @@ dialog{background:linear-gradient(145deg,#1a3b52,#102a40);border:1px solid #00bf
 
 /* Keep the search field flat inside its illuminated container. */
 .search input:not([type=range]):not([type=checkbox]){background:none;border:0;padding:0;margin:0;min-height:26px;border-radius:0;font-size:16px;box-shadow:none}
+
+/* Public seller details. */
+.requisites-dl{display:grid;grid-template-columns:180px minmax(0,1fr);gap:16px 24px;margin:0;font-size:17px;line-height:1.8}
+.requisites-dl dt{color:var(--muted)}.requisites-dl dd{margin:0;overflow-wrap:anywhere}.seller-name{font-family:Manrope,Arial,sans-serif;font-size:24px!important;font-weight:700!important;line-height:1.5!important}.requisites-contacts a{color:var(--accent)}
+@media(max-width:540px){.requisites-dl{grid-template-columns:1fr;gap:4px;font-size:16px}.requisites-dl dd{margin-bottom:16px}.seller-name{font-size:21px!important}}
